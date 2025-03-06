@@ -1,0 +1,26 @@
+{% block content %}
+<h2>Track Habit: {{ habit.name }}</h2>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Track  Progress</button>
+</form>
+
+<h3>Tracking History</h3>
+<ul>
+    {% for entry in tracked_entries %}
+        <li>{{ entry.date }} - {% if entry.completed %} ✅ Completed {% else %} ❌ Not Completed {% endif %}</li>
+    {% empty %}
+        <p>No tracking data available.</p>
+    {% endfor %}
+
+    {% if messages %}
+    {% for message in messages %}
+        <div class="alert {{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+</ul>
+
+<a href="{% url 'habits' %}">Back to Habits</a>
+{% endblock %}

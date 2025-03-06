@@ -1,0 +1,34 @@
+{% block content %}
+  <h2 class="text-center text-2xl font-bold my-4">🏆 Your Achievements</h2>
+
+  {% if badges %}
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {% for badge in badges %}
+        <div class="p-4 border rounded-lg shadow-md text-center">
+          {% if badge.icon %}
+            <img src="{{ badge.icon.url }}" alt="{{ badge.name }}" class="w-16 h-16 mx-auto">
+          {% endif %}
+          <h3 class="text-lg font-semibold mt-2">{{ badge.name }}</h3>
+          <p class="text-sm text-gray-500">{{ badge.description }}</p>
+          <span class="inline-block px-3 py-1 mt-2 text-white rounded-md 
+            {% if badge.level == 'bronze' %} bg-yellow-500 
+            {% elif badge.level == 'silver' %} bg-gray-400 
+            {% else %} bg-yellow-700 {% endif %}">
+            {{ badge.level|capfirst }} Badge
+          </span>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-center text-gray-500">No badges yet. Keep tracking your habits to earn rewards! 💪</p>
+  {% endif %}
+
+  <!-- Badge Claim Form -->
+  <form method="POST">
+    {% csrf_token %}
+    <label for="badge_id">Enter Badge ID to Claim:</label>
+    <input type="number" name="badge_id" required>
+    <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md">Claim Badge</button>
+  </form>
+
+{% endblock %}

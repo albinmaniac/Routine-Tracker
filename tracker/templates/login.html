@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+<center>
+    
+        <div class="container">
+            <div class="col-6 border border-2 shadow rounded" style=" color: rgb(103, 48, 2); border-radius: 10px; padding: 10px; margin: 20px;">
+            <h1 style="color: rgb(195, 10, 10); text-decoration: underline; font-size:60px;">Login Form</h1>
+    
+            <form action="" method="post">
+    
+                {%csrf_token%}
+    
+                {%for f in form%}
+                <div>
+                    <label for="">{{f.label_tag}}</label><br>
+                    {{f}}
+                </div><br>
+                {%endfor%}
+    <br>
+                <button type="submit" class=" btn btn-outline-success">Login</button>
+    
+            </form>
+            <br>
+            <h6> Still don't have an account ?🥲  <a href="{%url 'register'%}">Register here 🤪 </a> </h6>
+            <h6 > </h6>
+            </div>
+
+            
+        </div>
+</center>
+        
+</body>
+</html>

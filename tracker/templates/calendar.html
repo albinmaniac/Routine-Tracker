@@ -1,0 +1,112 @@
+{% load custom_filters %}
+
+<div class="calendar-section">
+    <h2>Calendar View</h2>
+    <p class="calendar-description">
+        Calendar integration allows you to view your routines alongside your other scheduled activities.
+    </p>
+
+    <div class="calendar-container">
+        <div class="calendar-header">
+            {{ today|date:"F Y" }}
+        </div>
+
+        <!-- Calendar Grid -->
+        <div class="calendar-grid">
+            <div class="calendar-day-header">Sun</div>
+            <div class="calendar-day-header">Mon</div>
+            <div class="calendar-day-header">Tue</div>
+            <div class="calendar-day-header">Wed</div>
+            <div class="calendar-day-header">Thu</div>
+            <div class="calendar-day-header">Fri</div>
+            <div class="calendar-day-header">Sat</div>
+
+            <!-- Blank Days for Alignment -->
+            {% for _ in blank_days %}
+            <div class="calendar-day empty"></div>
+            {% endfor %}
+
+            <!-- Display Days -->
+            {% for day in calendar_days %}
+            <div class="calendar-day {% if day.date == today %} today {% endif %} {% if day.has_routines %} has-routines {% endif %}">
+                <span class="day-number">{{ day.date.day }}</span>
+                
+                {% if day.has_routines %}
+                    <div class="routines-indicator">{{ day.routine_count }} routines</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .calendar-container {
+        max-width: 850px;
+        margin: auto;
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    .calendar-header {
+        text-align: center;
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 15px;
+        color: #333;
+    }
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 5px;
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 8px;
+    }
+    .calendar-day, .calendar-day-header {
+        padding: 15px;
+        text-align: center;
+        border: 1px solid #ccc;
+        min-height: 80px;
+        font-size: 16px;
+        position: relative;
+        border-radius: 5px;
+        transition: 0.3s;
+    }
+    .calendar-day-header {
+        font-weight: bold;
+        background: #343a40;
+        color: white;
+        border-radius: 5px;
+        padding: 10px;
+    }
+    .calendar-day.today {
+        background: #007bff;
+        color: white;
+        font-weight: bold;
+    }
+    .calendar-day.has-routines {
+        background: #d1e7dd;
+        border-color: #198754;
+    }
+    .calendar-day:hover {
+        background: #e3e3e3;
+        cursor: pointer;
+    }
+    .routines-indicator {
+        position: absolute;
+        bottom: 5px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 14px;
+        background: #198754;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 5px;
+    }
+    .calendar-day.empty {
+        background: transparent;
+        border: none;
+    }
+</style>

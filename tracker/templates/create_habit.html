@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Colorful Routine Tracker</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --purple: #6C63FF;
+      --pink: #FF6584;
+      --blue: #3F7FFF;
+      --green: #00C9A7;
+      --yellow: #FFC107;
+      --orange: #FF8A48;
+      --gradient: linear-gradient(135deg, var(--purple) 0%, var(--pink) 100%);
+    }
+    
+    body {
+      background: #f0f2f5;
+      font-family: 'Poppins', sans-serif;
+      color: #444;
+    }
+    
+    .form-container {
+      max-width: 900px;
+      margin: 40px auto;
+      border-radius: 20px;
+      background: url("/api/placeholder/900/50") center top no-repeat #fff;
+      background-size: 100% 8px;
+      box-shadow: 0 15px 35px rgba(50, 50, 93, 0.1), 0 5px 15px rgba(0, 0, 0, 0.07);
+      padding: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .form-title {
+      color: var(--purple);
+      font-weight: 700;
+      font-size: 32px;
+      margin-top: 15px;
+      margin-bottom: 5px;
+      text-align: center;
+    }
+    
+    .form-subtitle {
+      color: #777;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .color-tab {
+      position: absolute;
+      height: 100%;
+      width: 8px;
+      left: 0;
+      top: 0;
+      background: var(--gradient);
+    }
+    
+    .form-group {
+      margin-bottom: 25px;
+      position: relative;
+    }
+    
+    .form-label {
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 8px;
+      display: block;
+      transition: all 0.3s;
+    }
+    
+    .form-control {
+      border: 2px solid #e1e5ea;
+      border-radius: 12px;
+      padding: 12px 20px;
+      font-size: 16px;
+      transition: all 0.3s;
+    }
+    
+    .form-control:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(63, 127, 255, 0.15);
+      outline: none;
+    }
+    
+    .form-section {
+      background: #f8faff;
+      border-radius: 16px;
+      padding: 25px;
+      margin-bottom: 30px;
+      border-left: 5px solid;
+    }
+    
+    .basics-section {
+      border-left-color: var(--purple);
+    }
+    
+    .goals-section {
+      border-left-color: var(--green);
+    }
+    
+    .timing-section {
+      border-left-color: var(--orange);
+    }
+    
+    .section-title {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .section-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 10px;
+    }
+    
+    .basics-icon {
+      background-color: var(--purple);
+      color: white;
+    }
+    
+    .goals-icon {
+      background-color: var(--green);
+      color: white;
+    }
+    
+    .timing-icon {
+      background-color: var(--orange);
+      color: white;
+    }
+    
+    .section-text {
+      font-weight: 600;
+      font-size: 18px;
+      margin: 0;
+    }
+    
+    .submit-button {
+      background: var(--gradient);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-weight: 600;
+      padding: 14px 28px;
+      font-size: 16px;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3);
+      display: block;
+      width: 100%;
+      margin-top: 20px;
+    }
+    
+    .submit-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(108, 99, 255, 0.4);
+    }
+    
+    /* Bootstrap 5 Override */
+    .row > * {
+      padding-right: 10px;
+      padding-left: 10px;
+    }
+    
+    .form-helper-text {
+      margin-top: 5px;
+      font-size: 14px;
+      color: #888;
+    }
+    
+    .form-group:hover .form-label {
+      color: var(--purple);
+    }
+    
+    /* Animation */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .form-section {
+      animation: fadeIn 0.5s ease-out forwards;
+    }
+    
+    .basics-section { animation-delay: 0.1s; }
+    .goals-section { animation-delay: 0.2s; }
+    .timing-section { animation-delay: 0.3s; }
+  </style>
+</head>
+<body>
+  {% block content %}
+  <div class="container">
+    <div class="form-container">
+      <div class="color-tab"></div>
+      <h2 class="form-title">{% if form.instance.pk %}Enhance Your Habit{% else %}Create Beautiful Habit{% endif %}</h2>
+      <p class="form-subtitle">Build consistent routines that transform your life</p>
+      
+      <form method="post">
+        {% csrf_token %}
+        
+        <!-- Basics Section -->
+        <div class="form-section basics-section">
+          <div class="section-title">
+            <div class="section-icon basics-icon">B</div>
+            <h3 class="section-text">The Basics</h3>
+          </div>
+          
+          <div class="form-group">
+            <label for="{{ form.name.id_for_label }}" class="form-label">Habit Name</label>
+            {{ form.name }}
+            <div class="form-helper-text">What would you like to track?</div>
+          </div>
+          
+          <div class="form-group">
+            <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+            {{ form.description }}
+            <div class="form-helper-text">Why does this habit matter to you?</div>
+          </div>
+        </div>
+        
+        <!-- Goals Section -->
+        <div class="form-section goals-section">
+          <div class="section-title">
+            <div class="section-icon goals-icon">G</div>
+            <h3 class="section-text">Your Goals</h3>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="{{ form.goal.id_for_label }}" class="form-label">Goal</label>
+                {{ form.goal }}
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="{{ form.frequency.id_for_label }}" class="form-label">Frequency</label>
+                {{ form.frequency }}
+                <div class="form-helper-text">How often you'll practice this habit</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="{{ form.target_value.id_for_label }}" class="form-label">Target Value</label>
+                {{ form.target_value }}
+                <div class="form-helper-text">What you're aiming for</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="{{ form.completed_value.id_for_label }}" class="form-label">Completed Value</label>
+                {{ form.completed_value }}
+                <div class="form-helper-text">What you've achieved so far</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Timing Section -->
+        <div class="form-section timing-section">
+          <div class="section-title">
+            <div class="section-icon timing-icon">T</div>
+            <h3 class="section-text">Timing & Status</h3>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="{{ form.start_date.id_for_label }}" class="form-label">Start Date</label>
+                {{ form.start_date }}
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="{{ form.end_date.id_for_label }}" class="form-label">End Date</label>
+                {{ form.end_date }}
+                <div class="form-helper-text">Optional (leave blank for ongoing habits)</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="{{ form.status.id_for_label }}" class="form-label">Status</label>
+            {{ form.status }}
+          </div>
+        </div>
+        
+        <button type="submit" class="submit-button">
+          {% if form.instance.pk %}Update Habit{% else %}Create Habit{% endif %}
+        </button>
+      </form>
+    </div>
+  </div>
+  {% endblock %}
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

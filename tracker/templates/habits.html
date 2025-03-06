@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habit List</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+
+    <div class="container flex justify-between items-center px-5">
+        <!-- Left-Aligned Heading -->
+        <h1 class="text-2xl font-bold">Your Habits</h1>
+        
+        <!-- Right-Aligned Button -->
+        <button class="border-2 border-red-400 bg-orange-500 text-white rounded-full px-4 py-2">
+            <a href="{% url 'dashboard' %}" class="no-underline text-white">Go to Dashboard</a>
+        </button>
+    </div>
+
+    <br><hr><br>
+    
+    {% if habits %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for habit in habits %}
+                <div class="habit-card bg-white shadow-md rounded-lg p-6 flex justify-between items-center">
+                    <a href="{% url 'habit-detail' habit.id %}">
+                        <div class="habit-info">
+                            <h3 class="text-lg font-semibold">{{ habit.name }}</h3>
+                            <p class="text-gray-600">{{ habit.description }}</p>
+                            <p class="text-gray-600">Streak: {{ habit.progress_percentage }}%</p>
+                            <p class="text-gray-600">Goal: {{ habit.target_value }}</p>
+                            <p class="text-gray-600">Completed: {{ habit.completed_value }}</p>
+                            <p class="text-gray-600">Frequency: {{ habit.get_frequency_display }}</p>
+                            <p class="text-gray-600">Status: 
+                                <span class="{% if habit.status == 'active' %} text-green-500 {% elif habit.status == 'completed' %} text-blue-500 {% else %} text-gray-500 {% endif %}">
+                                    {{ habit.get_status_display }}
+                                </span>
+                            </p>
+                        </div>
+                    </a>
+
+                    <!-- Progress Circle -->
+                    <div class="progress-container relative w-20 h-20">
+                        <svg class="progress-ring absolute inset-0 w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                            <!-- Background Circle -->
+                            <circle cx="50" cy="50" r="40" stroke-width="8" fill="none" stroke="#e0e0e0"></circle>
+                            
+                            <!-- Progress Circle -->
+                            <circle cx="50" cy="50" r="40" stroke-width="8" fill="none" 
+                                stroke="blue" stroke-dasharray="251.2" 
+                                stroke-dashoffset="{{ habit.stroke_dashoffset }}"
+                                stroke-linecap="round">
+                            </circle>
+                        </svg>
+
+                        <!-- Completion Percentage in Center -->
+                        <div class="absolute inset-0 flex justify-center items-center text-black font-bold">
+                            {{ habit.progress_percentage }}%
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-gray-500">No habits found. Start tracking your habits today!</p>
+    {% endif %}
+    
+    <br>
+
+</body>
+</html>

@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <title>Routine Tracker</title>
+    <style>
+
+        .habit-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+        .habit-info {
+            flex: 1;
+        }
+        .habit-info h3 {
+            margin: 0;
+            font-size: 20px;
+        }
+        .habit-info p {
+            margin: 5px 0;
+            color: #555;
+        }
+        .completed-badge {
+            display: inline-block;
+            margin-top: 5px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .progress-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background-color: #ffffff;
+            padding: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px 0 40px 0;
+        }
+
+        .header h1 {
+            font-size: 42px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 20px;
+            color: #555;
+        }
+
+        .nav-container {
+            background-color: #f2f3f5;
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .nav-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 16px;
+            font-size: 16px;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: #333;
+        }
+
+        .nav-button.active {
+            background-color: #121629;
+            color: white;
+        }
+
+        .add-routine-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 20px;
+            font-size: 18px;
+            font-weight: 500;
+            border-radius: 10px;
+            cursor: pointer;
+            background-color: #121629;
+            color: white;
+            border: none;
+            margin-bottom: 40px;
+        }
+
+        .add-icon {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        /* Stats styles */
+        .stats-section h2 {
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .stat-card {
+            background-color: #9c9696;
+            border-radius: 10px;
+            padding: 25px;
+        }
+
+        .stat-title {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .stat-value {
+            font-size: 48px;
+            font-weight: bold;
+        }
+
+        /* Calendar styles */
+        .calendar-section h2 {
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+
+        .calendar-description {
+            text-align: center;
+            font-size: 18px;
+            color: #c9d6f1;
+            margin-bottom: 30px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .calendar-container {
+            background-color: #c9d6f1;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .calendar-header {
+            background-color: #6b8089;
+            padding: 15px 20px;
+            font-size: 22px;
+            font-weight: bold;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+        }
+
+        .calendar-day-header {
+            text-align: center;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            font-weight: 500;
+        }
+
+        .calendar-day {
+            min-height: 80px;
+            padding: 10px;
+            border-right: 1px solid #ddd;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 500;
+            position: relative;
+        }
+
+        .calendar-day:nth-child(7n) {
+            border-right: none;
+        }
+
+        .calendar-day.has-routines {
+            background-color: #e0eaff;
+        }
+
+        .routines-indicator {
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: #e141d1;
+            font-size: 14px;
+            font-weight: normal;
+            font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        }
+
+        .calendar-day.today {
+            background: #5ab372;
+            color: rgb(121, 18, 18);
+            font-weight: bold;
+        }
+        .calendar-day.has-routines {
+            background: #d1e7dd;
+            border-color: #198754;
+        }
+        .calendar-day:hover {
+            background: #b8afaf;
+            cursor: pointer;
+        }
+
+        /* Settings styles */
+        .settings-section h2 {
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+
+        .settings-group {
+            margin-bottom: 30px;
+        }
+
+        .settings-group-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .settings-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .settings-item:last-child {
+            border-bottom: none;
+        }
+
+        .settings-item-label {
+            font-size: 18px;
+        }
+
+        .danger-text {
+            color: #e74c3c;
+            cursor: pointer;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: #4285f4;
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(30px);
+        }
+
+        /* Icons */
+        .icon {
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Routine Tracker</h1>
+        <p>Build better habits, one day at a time</p>
+
+        <h1 style="color: #e74c3c; font-size: large; font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;"> Welcome  : {{ user.get_full_name }} 🔥</h1>
+    </div>
+
+    <div class="nav-container">
+        <button class="nav-button" id="routines-btn">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+
+            Routines
+        </button>
+        <button class="nav-button" id="stats-btn">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+
+            Stats
+        </button>
+        <button class="nav-button" id="calendar-btn">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+
+            Calendar
+        </button>
+        <button class="nav-button active" id="settings-btn">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+            Settings
+        </button>
+    </div>
+
+    <button class="add-routine-button">
+        <a href="{%url 'createhabit'%}">
+        <span class="add-icon">+</span>
+        Add New Routine</a>
+    </button>
+
+    
+
+    <div class="content-section" id="routines-section">
+        <div class="container mx-auto px-4 py-6">
+        
+            {% if messages %}
+                <div class="mb-6">
+                    {% for message in messages %}
+                        <div class="p-4 rounded-md {% if message.tags == 'success' %} bg-green-100 text-green-800 {% elif message.tags == 'error' %} bg-red-100 text-red-800 {% else %} bg-blue-100 text-blue-800 {% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        
+            <h2 class="text-3xl font-bold mb-6 text-center text-gray-700">My Habit Dashboard</h2>
+            
+            {% if error %}
+                <p class="text-red-500 text-center">{{ error }}</p>
+            {% endif %}
+    
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                {% for habit in habits %}
+                    <div class="habit-card bg-white shadow-md rounded-lg p-6 flex justify-between items-center">
+                        <a href="{%url 'habit-detail' habit.id%}">
+                        <div class="habit-info">
+                            
+                            <h3 class="text-lg font-semibold text-gray-800">{{ habit.name }}</h3>
+                            <p class="text-gray-600">Streak: {{ habit.progress_percentage }}%</p>
+                            <p class="text-gray-600">Frequency: {{ habit.get_frequency_display }}</p>
+                            <p class="text-gray-600">Goal: {{ habit.target_value }}</p>
+                            <p class="text-gray-600">Completed: {{ habit.completed_value }}</p>
+                            
+                            <span class="completed-badge {% if habit.trackers.last.completed %} bg-green-500 {% else %} bg-red-500 {% endif %} text-white px-3 py-1 rounded-md text-sm">
+                                {% if habit.trackers.last.completed %} Completed {% else %} In Progress {% endif %}
+                            </span>
+                        </div>
+    
+                        <!-- Progress Circle -->
+                        <div class="progress-container relative w-20 h-20">
+                            <svg class="progress-ring absolute inset-0 w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                                <!-- Background Circle -->
+                                <circle cx="50" cy="50" r="40" stroke-width="8" fill="none" stroke="#e0e0e0"></circle>
+                                
+                                <!-- Progress Circle -->
+                                <circle cx="50" cy="50" r="40" stroke-width="8" fill="none" 
+                                    stroke="blue" stroke-dasharray="251.2" 
+                                    stroke-dashoffset="{{ habit.stroke_dashoffset }}"
+                                    stroke-linecap="round">
+                                </circle>
+                            </svg>
+    
+                            <!-- Completion Percentage in Center -->
+                            <div class="absolute inset-0 flex justify-center items-center text-black font-bold">
+                                {{ habit.progress_percentage }}%
+                            </div>
+                        </div>
+                        </a>
+                    </div>
+                    
+                {% empty %}
+                    <p class="text-gray-500 text-center w-full">No habits added yet.</p>
+                {% endfor %}
+            </div>
+    
+        </div>
+    </div>
+    </div>
+
+    
+
+
+
+    <div class="content-section" id="stats-section">
+        <div class="stats-section">
+            <h2>Your Statistics</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-title">Total Habits</div>
+                    <div class="stat-value">{{ total_habits }}</div>  <!-- Corrected here -->
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Longest Streak</div>
+                    <div class="stat-value">{{ longest_streak }} days</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Weekly Completions</div>
+                    <div class="stat-value">{{ total_weekly_completions }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <div class="content-section" id="calendar-section">
+        <div class="calendar-section">
+            <div class="content-section" id="calendar-section">
+                {% load custom_filters %}
+
+                <div class="calendar-section">
+                    <h2>Calendar View</h2>
+                    <p class="calendar-description">
+                        Calendar integration allows you to view your routines alongside your other scheduled activities.
+                    </p>
+
+                    <div class="calendar-container">
+                        <div class="calendar-header">
+                            🗓️{{ today|date:"F Y" }}
+                        </div>
+
+                        <!-- Calendar Grid -->
+                        <div class="calendar-grid">
+                            <div class="calendar-day-header">Sun</div>
+                            <div class="calendar-day-header">Mon</div>
+                            <div class="calendar-day-header">Tue</div>
+                            <div class="calendar-day-header">Wed</div>
+                            <div class="calendar-day-header">Thu</div>
+                            <div class="calendar-day-header">Fri</div>
+                            <div class="calendar-day-header">Sat</div>
+
+                            <!-- Blank Days for Alignment -->
+                            {% for _ in blank_days %}
+                            <div class="calendar-day empty"></div>
+                            {% endfor %}
+
+                            <!-- Display Days -->
+                            {% for day in calendar_days %}
+                            <div class="calendar-day {% if day.date == today %} today {% endif %} {% if day.has_routines %} has-routines {% endif %}">
+                                <span class="day-number">{{ day.date.day }}</span>
+                                
+                                {% if day.has_routines %}
+                                    <div class="routines-indicator">{{ day.routine_count }} routines</div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="content-section active" id="settings-section">
+        <div class="settings-section">
+            <h2>Settings</h2>
+            
+            <div class="settings-group">
+                <h3 class="settings-group-title">Notifications</h3>
+                <div class="settings-item">
+                    <div class="settings-item-label">Daily Reminders</div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="settings-item">
+                    <div class="settings-item-label">Weekly Summary</div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="settings-group">
+                <h3 class="settings-group-title">Appearance</h3>
+                <div class="settings-item">
+                    <div class="settings-item-label">Dark Mode</div>
+                    <label class="toggle-switch">
+                        <input type="checkbox">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="settings-group">
+                <h3 class="settings-group-title">Account</h3>
+                <div class="settings-item">
+                    <a href="{%url 'signout'%}">
+                    <div class="settings-item-label danger-text">Log Out</div></a>
+                </div>
+                <div class="settings-item">
+                    <div class="settings-item-label danger-text">Delete Account</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+    <script>
+        // Get all nav buttons
+        const navButtons = document.querySelectorAll('.nav-button');
+        const contentSections = document.querySelectorAll('.content-section');
+
+        // Add click event to each button
+        navButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons
+                navButtons.forEach(btn => btn.classList.remove('active'));
+                
+                // Add active class to clicked button
+                this.classList.add('active');
+                
+                // Show the corresponding content section
+                const targetId = this.id.replace('-btn', '-section');
+                contentSections.forEach(section => {
+                    section.classList.remove('active');
+                    if (section.id === targetId) {
+                        section.classList.add('active');
+                    }
+                });
+            });
+        });
+
+
+
+        // Add routine button functionality
+        document.querySelector('.add-routine-button').addEventListener('click', function() {
+            alert('Add new routine form would appear here');
+        });
+
+        // Toggle switch functionality
+        document.querySelectorAll('.toggle-switch input').forEach(toggle => {
+            toggle.addEventListener('change', function() {
+                // In a real app, you would save the setting here
+                console.log('Setting changed:', this.checked);
+            });
+        });
+
+        // Account action buttons
+        document.querySelectorAll('.danger-text').forEach(text => {
+            text.addEventListener('click', function() {
+                if (this.textContent === 'Log Out') {
+                    if (confirm('Are you sure you want to log out?')) {
+                        alert('You have been logged out');
+                    }
+                } else if (this.textContent === 'Delete Account') {
+                    if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                        alert('Your account has been deleted');
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
+
+

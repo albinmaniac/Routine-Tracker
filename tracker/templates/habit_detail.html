@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ habit.name }} - Habit Details</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6 flex justify-center items-center min-h-screen">
+
+    <div class="bg-white shadow-md rounded-lg p-6 max-w-lg w-full">
+        <!-- Habit Name -->
+        <h2 class="text-2xl font-bold text-gray-800 text-center">{{ habit.name }}</h2>
+        <p class="text-gray-600 text-center">{{ habit.description }}</p>
+
+        <div class="flex justify-between mt-4">
+            <p class="text-gray-700"><strong>Goal:</strong> {{ habit.goal }}</p>
+            <p class="text-gray-700"><strong>Target:</strong> {{ habit.target_value }}</p>
+        </div>
+
+        <div class="flex justify-between mt-2">
+            <p class="text-gray-700"><strong>Frequency:</strong> {{ habit.get_frequency_display }}</p>
+            <p class="text-gray-700"><strong>Start:</strong> {{ habit.start_date }}</p>
+            <p class="text-gray-700"><strong>End:</strong> {{ habit.end_date }}</p>
+        </div>
+
+        <!-- Progress Circle -->
+        <div class="flex justify-center my-6">
+            <div class="progress-container relative w-24 h-24">
+                <svg class="progress-ring absolute inset-0 w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                    <!-- Background Circle -->
+                    <circle cx="50" cy="50" r="40" stroke-width="8" fill="none" stroke="#e0e0e0"></circle>
+
+                    <!-- Progress Circle -->
+                    <circle cx="50" cy="50" r="40" stroke-width="8" fill="none" 
+                        stroke="blue" stroke-dasharray="251.2" 
+                        stroke-dashoffset="{{ habit.stroke_dashoffset }}"
+                        stroke-linecap="round">
+                    </circle>
+                </svg>
+
+                <!-- Completion Percentage in Center -->
+                <div class="absolute inset-0 flex justify-center items-center text-black font-bold">
+                    {{ habit.progress_percentage }}%
+                </div>
+            </div>
+        </div>
+
+        <!-- Habit Tracking Stats -->
+        <div class="bg-gray-200 rounded-lg p-4">
+            <p class="text-gray-700"><strong>Current Streak:</strong> {{ habit.stats.streak }} days</p>
+            <p class="text-gray-700"><strong>Completion Rate:</strong> {{ habit.stats.completion_rate|floatformat:2 }}%</p>
+        </div>
+
+        <!-- Mark Habit as Completed -->
+        <h3 class="text-lg font-semibold mt-4">Mark Habit as Completed</h3>
+        <form method="post" class="mt-2">
+            {% csrf_token %}
+            <input type="hidden" name="habit_id" value="{{ habit.id }}">
+            
+            <!-- Hidden field to ensure a value is always sent -->
+            <input type="hidden" name="completed" value="false">
+            
+            <label class="flex items-center space-x-2">
+                <input type="checkbox" name="completed" value="true"
+                    {% if habit.trackers.last.completed %}checked{% endif %}
+                    onchange="this.form.submit();">
+                <span class="text-gray-700">Completed today</span>
+            </label>
+        </form>
+
+        <!-- Buttons -->
+        <div class="flex justify-between mt-6">
+            <a href="{% url 'habit-update' habit.pk %}" class="bg-blue-500 text-white px-4 py-2 rounded-lg">Edit</a>
+            <a href="{% url 'habit-delete' habit.pk %}" class="bg-red-500 text-white px-4 py-2 rounded-lg">Delete</a>
+            <a href="{% url 'habits' %}" class="bg-gray-500 text-white px-4 py-2 rounded-lg">Go Back</a>
+        </div>
+    </div>
+
+</body>
+</html>
