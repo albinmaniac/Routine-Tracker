@@ -2,6 +2,12 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from datetime import timedelta
 from django.utils import timezone
+from django.contrib.auth import get_user_model
+from django.db import models
+from django.utils.timezone import now, localtime, timedelta
+from tracker.utils import send_habit_email
+from tracker.utils import send_habit_email
+from tracker.tasks import send_habit_reminders  # ✅ Correct Celery task import
 
 # Custom User Model
 class CustomUser(AbstractUser):
@@ -20,7 +26,6 @@ class CustomUser(AbstractUser):
 
     gender=models.CharField(max_length=10,choices=GENDER_CHOICES,default='male')
 
-    badges = models.ManyToManyField('tracker.Badge', related_name="users", blank=True)  
 
     def is_admin(self):
         return self.role == 'admin'
@@ -33,25 +38,27 @@ class CustomUser(AbstractUser):
 
 
 
-from django.contrib.auth import get_user_model
-
-CustomUser = get_user_model()
-
 class Habit(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='habits')
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)
-    goal = models.CharField(max_length=100, null=True)  
+    goal = models.CharField(max_length=100, null=True)
+    
     frequency = models.CharField(max_length=50, choices=[
         ('daily', 'Daily'),
         ('weekly', 'Weekly'),
         ('monthly', 'Monthly')
     ])
-    target_value = models.FloatField(default=0.0, blank=True, null=True) 
-    completed_value = models.FloatField(default=0.0)  # Tracks progress toward target
-    start_date = models.DateField(null=True, blank=True) 
-    end_date = models.DateField(null=True, blank=True)  
+    
+    target_value = models.FloatField(default=0.0, blank=True, null=True)
+    completed_value = models.FloatField(default=0.0)
+    
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    reminder_time = models.DateTimeField(null=True, blank=True)
+    reminder_sent = models.BooleanField(default=False)
 
     STATUS_CHOICES = [
         ('active', 'Active'),
@@ -67,69 +74,61 @@ class Habit(models.Model):
         return 0
 
     def update_status(self):
-        """✅ Auto-update status without calling save() recursively"""
+        """✅ Auto-update status & send completion email"""
+        old_status = self.status  # Store previous status
+
         if self.progress_percentage() >= 100:
             self.status = 'completed'
         elif self.completed_value > 0:
             self.status = 'active'
         else:
-            self.status = 'paused'  # Optional: Handle paused habits
+            self.status = 'paused'
+
+        # ✅ Only send "Habit Completed" email when it transitions from non-completed to completed
+        if old_status != 'completed' and self.status == 'completed':
+            send_habit_email(self.user, self, email_type="habit_completed")  
+
+    def schedule_reminder(self):
+        """✅ Schedule reminders if habit is pending"""
+        now_time = localtime()
+
+        # ✅ If a reminder time is set, schedule it
+        if self.reminder_time and self.reminder_time > now_time:
+            send_habit_reminders.apply_async((self.id,), eta=self.reminder_time)
+
+        # ✅ If habit is still incomplete before midnight, send a reminder at 23:59
+        end_of_day = now_time.replace(hour=23, minute=59, second=0)
+        if self.status != 'completed' and now_time < end_of_day:
+            send_habit_reminders.apply_async((self.id,), eta=end_of_day)
 
     def save(self, *args, **kwargs):
-        """✅ Override save to ensure status is updated before saving"""
-        self.update_status()  # Only updates the status field, no recursion
+        """✅ Override save to update status & trigger emails"""
+        new_habit = self.pk is None  # Check if it's a new habit
+        old_instance = None
+
+        if not new_habit:
+            old_instance = Habit.objects.filter(pk=self.pk).first()
+
+        self.update_status()  # Update status before saving
         super().save(*args, **kwargs)  # Call original save method
+
+        # ✅ Send email when a new habit is created
+        if new_habit:
+            send_habit_email(self.user, self, email_type="habit_created")  
+
+        # ✅ Schedule reminders if reminder_time is set or changed
+        if new_habit or (old_instance and old_instance.reminder_time != self.reminder_time):
+            self.schedule_reminder()
+
+        # ✅ Send "Pending Habit" email at the end of the day if habit is still not completed
+        if old_instance and old_instance.status == "active" and self.status != "completed":
+            end_of_day = localtime().replace(hour=23, minute=59, second=0)
+            from tracker.tasks import send_habit_email_task  
+            send_habit_email_task.apply_async((self.user.id, self.id, "pending_habit"), eta=end_of_day)
 
     def __str__(self):
         return f"{self.name} ({self.progress_percentage()}%)"
 
-# class Habit(models.Model):
-#     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='habits')
-#     name = models.CharField(max_length=100)
-#     description = models.TextField(blank=True, null=True)
-#     goal = models.CharField(max_length=100,null=True)  
-#     frequency = models.CharField(max_length=50, choices=[
-#         ('daily', 'Daily'),
-#         ('weekly', 'Weekly'),
-#         ('monthly', 'Monthly')
-#     ])
-#     target_value = models.FloatField(default=0.0, blank=True, null=True) 
-#     completed_value = models.FloatField(default=0.0)  # Tracks progress toward target
-#     start_date = models.DateField(null=True, blank=True) 
-#     end_date = models.DateField(null=True, blank=True)  
-#     created_at = models.DateTimeField(auto_now_add=True)
-    
-#     STATUS_CHOICES = [
-#         ('active', 'Active'),
-#         ('completed', 'Completed'),
-#         ('paused', 'Paused'),
-#     ]
-#     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
-
-#     def progress_percentage(self):
-#         """Calculate habit completion percentage"""
-#         if self.target_value and self.target_value > 0:
-#             return int((self.completed_value / self.target_value) * 100)
-#         return 0
-    
-#     def update_status(self):
-#         """✅ Auto-update status based on progress"""
-#         if self.progress_percentage() >= 100:
-#             self.status = 'completed'
-#         elif self.completed_value > 0:
-#             self.status = 'active'
-#         else:
-#             self.status = 'paused'  # Optional: Handle paused habits
-#         self.save()
-
-#     def save(self, *args, **kwargs):
-#         """✅ Override save to ensure status is updated"""
-#         self.update_status()  # Automatically check & update status before saving
-#         super().save(*args, **kwargs)  # Call original save method
-
-
-#     def __str__(self):
-#         return f"{self.name} ({self.progress_percentage()}%)"
 
 
 class HabitTracker(models.Model):
@@ -231,30 +230,16 @@ class HabitReminder(models.Model):
 #===============
 
 
-class Badge(models.Model):
 
-    BRONZE = 'bronze'
-    SILVER = 'silver'
-    GOLD = 'gold'
 
-    LEVEL_CHOICES = (
 
-        (BRONZE, 'Bronze'),
-        (SILVER, 'Silver'),
-        (GOLD, 'Gold'),
-    )
-
-    name = models.CharField(max_length=100)
-    description = models.TextField()
-    level = models.CharField(max_length=10, choices=LEVEL_CHOICES, default=BRONZE)
-    icon = models.ImageField(upload_to='badges/', null=True, blank=True)
-    points = models.PositiveIntegerField(default=10)  # 🔥 Add points for leaderboards
-
-    class Meta:
-        unique_together = ('name', 'level')  # ✅ Ensure no duplicate badge levels
+class Notification(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="notifications")
+    message = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    read = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.name} ({self.level.capitalize()})"
+        return f"Notification for {self.user.username} at {self.timestamp}"
     
-
-
+    

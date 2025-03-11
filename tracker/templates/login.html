@@ -1,41 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <style>
+        body {
+            /* background: linear-gradient(135deg, #6E85B7, #B2C8DF); */
+            background-image:url('https://images.unsplash.com/photo-1636955779321-819753cd1741?q=80&w=2942&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .login-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            width: 350px;
+        }
+        .input-group-text {
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-<center>
-    
-        <div class="container">
-            <div class="col-6 border border-2 shadow rounded" style=" color: rgb(103, 48, 2); border-radius: 10px; padding: 10px; margin: 20px;">
-            <h1 style="color: rgb(195, 10, 10); text-decoration: underline; font-size:60px;">Login Form</h1>
-    
-            <form action="" method="post">
-    
-                {%csrf_token%}
-    
-                {%for f in form%}
-                <div>
-                    <label for="">{{f.label_tag}}</label><br>
-                    {{f}}
-                </div><br>
-                {%endfor%}
-    <br>
-                <button type="submit" class=" btn btn-outline-success">Login</button>
-    
-            </form>
-            <br>
-            <h6> Still don't have an account ?🥲  <a href="{%url 'register'%}">Register here 🤪 </a> </h6>
-            <h6 > </h6>
+    <div class="login-container">
+        <h2 class="text-center mb-4">Login</h2>
+        <form action="" method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" id="username" name="username" class="form-control" required>
             </div>
-
-            
-        </div>
-</center>
-        
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <div class="input-group">
+                    <input type="password" id="password" name="password" class="form-control" required>
+                    <span class="input-group-text" onclick="togglePassword()">
+                        <i id="toggleIcon" class="fas fa-eye"></i>
+                    </span>
+                </div>
+            </div>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary">Login</button>
+            </div>
+            <div class="text-center mt-3">
+                <a href="#">Forgot Password?</a>
+            </div>
+            <div class="text-center mt-3">
+                <p>Don't have an account? <a href="{% url 'register' %}">Sign Up</a></p>
+            </div>
+        </form>
+    </div>
+    <script>
+        function togglePassword() {
+            let passwordField = document.getElementById("password");
+            let toggleIcon = document.getElementById("toggleIcon");
+            if (passwordField.type === "password") {
+                passwordField.type = "text";
+                toggleIcon.classList.replace("fa-eye", "fa-eye-slash");
+            } else {
+                passwordField.type = "password";
+                toggleIcon.classList.replace("fa-eye-slash", "fa-eye");
+            }
+        }
+    </script>
 </body>
 </html>

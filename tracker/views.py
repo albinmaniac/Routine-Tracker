@@ -3,7 +3,7 @@ from django.views.generic import View
 from django.contrib.auth import authenticate, login, logout
 from tracker.forms import RegistrationForm, LoginForm,HabitForm,HabitTrackerForm
 from tracker.models import CustomUser  
-from tracker.models import Habit, HabitTracker, HabitStats,Badge
+from tracker.models import Habit, HabitTracker, HabitStats
 from django.contrib import messages 
 import calendar
 from datetime import date
@@ -220,30 +220,51 @@ class HabitDetailView(View):
             "habit_stats": habit_stats
         })
     
+    # def post(self, request, pk, *args, **kwargs):
+    #     habit = get_object_or_404(Habit, pk=pk, user=request.user)
+    #     completed = request.POST.get("completed") == "true"  # Convert to boolean
+
+    #     # ✅ Get today's tracker or create a new one
+    #     tracker, created = HabitTracker.objects.get_or_create(habit=habit, date=timezone.now().date())
+
+    #     # ✅ Update completion status & progress
+    #     tracker.completed = completed
+    #     tracker.value_done = habit.target_value if completed else 0.0  # 100% if checked, 0% if unchecked
+    #     tracker.save()  # ✅ Auto-calls `save()` with progress update
+
+    #     # ✅ Update habit progress
+    #     habit.completed_value = habit.target_value if completed else 0.0  # 100% or reset to 0
+
+    #     # ✅ Update `end_date` only if completed
+    #     if completed:
+    #         habit.end_date = timezone.now().date()  # Set today's date
+    #     elif habit.trackers.filter(completed=True).exists():
+    #         # If there are previous completions, keep the last completed date
+    #         habit.end_date = habit.trackers.filter(completed=True).latest('date').date
+    #     else:
+    #         habit.end_date = None  # Reset if no completion history
+
+    #     habit.save()
+
+    #     return redirect("habit-detail", pk=habit.pk)
     def post(self, request, pk, *args, **kwargs):
         habit = get_object_or_404(Habit, pk=pk, user=request.user)
-        completed = request.POST.get("completed") == "true"  # Convert to boolean
 
-        # ✅ Get today's tracker or create a new one
+        # ✅ Get today's tracker
         tracker, created = HabitTracker.objects.get_or_create(habit=habit, date=timezone.now().date())
 
-        # ✅ Update completion status & progress
-        tracker.completed = completed
-        tracker.value_done = habit.target_value if completed else 0.0  # 100% if checked, 0% if unchecked
-        tracker.save()  # ✅ Auto-calls `save()` with progress update
+        # ✅ Prevent multiple changes
+        if tracker.completed:  
+            return redirect("habit-detail", pk=habit.pk)  # Ignore if already completed
+
+        # ✅ Mark as completed
+        tracker.completed = True
+        tracker.value_done = habit.target_value  
+        tracker.save()
 
         # ✅ Update habit progress
-        habit.completed_value = habit.target_value if completed else 0.0  # 100% or reset to 0
-
-        # ✅ Update `end_date` only if completed
-        if completed:
-            habit.end_date = timezone.now().date()  # Set today's date
-        elif habit.trackers.filter(completed=True).exists():
-            # If there are previous completions, keep the last completed date
-            habit.end_date = habit.trackers.filter(completed=True).latest('date').date
-        else:
-            habit.end_date = None  # Reset if no completion history
-
+        habit.completed_value = habit.target_value  
+        habit.end_date = timezone.now().date()  
         habit.save()
 
         return redirect("habit-detail", pk=habit.pk)
@@ -384,29 +405,7 @@ class HabitStatsView(View):
     
 
 
-class BadgeView(View):
-    
-    template_name = "badges.html"
 
-    def get(self, request, *args, **kwargs):
-
-        badges = request.user.badges.all()
-        badge = Badge.objects.get(name="7-Day Streak")
-        print(badge.id) 
-        return render(request, self.template_name, {"badges": badges})
-
-    def post(self, request, *args, **kwargs):
-
-        badge_id = request.POST.get("badge_id")
-        badge = get_object_or_404(Badge, id=badge_id)
-        badge = Badge.objects.get(name="7-Day Streak")
-        print(badge.id)  # This will print the ID of the badge
-
-        # 🏆 Award the badge if not already earned
-        if badge not in request.user.badges.all():
-            request.user.badges.add(badge)
-
-        return redirect("badge-list")  # Redirect to badge list
     
 
 
@@ -457,3 +456,43 @@ class CalendarView(TemplateView):
         context["blank_days"] = blank_days  # Corrected blank days calculation
 
         return context
+    
+
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from tracker.models import Notification
+from django.middleware.csrf import get_token
+
+@login_required
+def get_notifications(request):
+    """✅ Fetch unread notifications for the logged-in user"""
+    notifications = Notification.objects.filter(user=request.user, read=False).order_by('-timestamp')
+    data = [
+        {
+            "id": notification.id,
+            "message": notification.message,
+            "timestamp": notification.timestamp.strftime('%Y-%m-%d %H:%M'),
+            "read": notification.read
+        }
+        for notification in notifications
+    ]
+    return JsonResponse({"notifications": data})
+
+@login_required
+@require_POST  # Ensures only POST requests are allowed
+def mark_notification_as_read(request, notification_id):
+    """✅ Marks a notification as read"""
+    try:
+        notification = Notification.objects.get(id=notification_id, user=request.user)
+        notification.read = True
+        notification.save()
+        return JsonResponse({"success": True})
+    except Notification.DoesNotExist:
+        return JsonResponse({"error": "Notification not found"}, status=404)
+    
+@login_required
+def get_csrf_token(request):
+    """✅ Returns a CSRF token for AJAX requests"""
+    return JsonResponse({"csrfToken": get_token(request)})
+

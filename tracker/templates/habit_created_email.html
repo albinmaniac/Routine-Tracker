@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habit Created</title>
+</head>
+<body style="font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 600px; margin: 20px auto; background: #ffffff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+        <tr>
+            <td style="background: #007bff; padding: 20px; text-align: center; color: #ffffff; font-size: 24px; font-weight: bold;">
+                🎯 New Habit Created!
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 20px; text-align: center;">
+                <p style="font-size: 18px; color: #333;">Hello {{ user.first_name }},</p>
+                <p style="font-size: 16px; color: #555;">You've successfully created a new habit:</p>
+                <h2 style="color: #007bff;">{{ habit.name }}</h2>
+                <p style="font-size: 16px; color: #555;">Goal: <strong>{{ habit.goal }}</strong></p>
+                <p style="font-size: 16px; color: #555;">Frequency: <strong>{{ habit.frequency|title }}</strong></p>
+                <p style="font-size: 16px; color: #555;">Reminder Time: <strong>{{ habit.reminder_time }}</strong></p>
+                <hr style="border: 1px solid #ddd; margin: 20px 0;">
+                <p style="font-size: 14px; color: #666;">Stay consistent and track your progress in the Routine Tracker app!</p>
+                <a href="{{ site_url }}" style="background: #007bff; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; font-size: 16px;">View Habit</a>
+            </td>
+        </tr>
+        <tr>
+            <td style="background: #f4f4f4; padding: 10px; text-align: center; font-size: 12px; color: #777;">
+                &copy; 2025 Routine Tracker. All rights reserved.
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

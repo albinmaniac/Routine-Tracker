@@ -3,35 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Registration Form</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body, html {
+            height: 100%;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-image: url('https://images.unsplash.com/photo-1604076913837-52ab5629fba9?q=80&w=2731&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+            background-size: cover;
+            padding: 1rem;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            width: 100%;
+            max-width: 28rem;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        
+        /* General Input Styling */
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.3s;
+            background: none;
+            appearance: none; /* Removes default select arrow */
+        }
+
+        /* Floating Label Styling */
+        .form-group label {
+            position: absolute;
+            top: 50%;
+            left: 14px;
+            transform: translateY(-50%);
+            font-size: 1rem;
+            color: #777;
+            transition: 0.3s;
+            background: white;
+            padding: 0 5px;
+            pointer-events: none;
+        }
+
+        /* Move label when input is focused or filled */
+        input:focus + label,
+        input:not(:placeholder-shown) + label {
+            top: 5px;
+            font-size: 0.8rem;
+            color: #667eea;
+        }
+
+        input:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+
+        /* Fix for Select Box */
+        .form-group select {
+            background: white;
+            color: #333;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        /* Add space for the label in select */
+        .form-group select + label {
+            top: -10px;
+            left: 14px;
+            font-size: 0.8rem;
+            color: #667eea;
+        }
+        
+        .submit-button {
+            width: 100%;
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .submit-button:hover {
+            background: #5a67d8;
+        }
+        
+        .error-messages {
+            color: red;
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 1.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
-<center>
     <div class="container">
-
-
-        <h1 style="color: rgba(198, 75, 75, 0.743); text-decoration: underline; font-size: 60px;">Sign Up Form</h1>
-
+        <h3><a href="{%url 'login'%}">🔙 </a></h3>
+        <h1>Register Here 🔥</h1>
         <form action="" method="post">
-
-            {%csrf_token%}
-
-            {%for f in form%}
-            <div>
-                <label for="">{{f.label_tag}}</label><br>
-                {{f}}
-            </div><br>
-            {%endfor%}
-<br>
-            <button type="submit">Sign Up</button>
-
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group">
+                {{ field }}
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            </div>
+            {% endfor %}
+            <button type="submit" class="submit-button">Sign Up</button>
         </form>
-
-        {%if form.errors%}
-        {{form.errors}}
-        {%endif%}
+        {% if form.errors %}
+        <div class="error-messages">
+            {{ form.errors }}
+        </div>
+        {% endif %}
     </div>
-</center>
-    
 </body>
 </html>

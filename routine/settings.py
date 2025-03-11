@@ -28,6 +28,8 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
+import os
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -39,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'tracker',
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
@@ -56,7 +59,7 @@ ROOT_URLCONF = 'routine.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, "templates")],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -81,6 +84,7 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+ # Change this to your actual domain
 
 
 # Password validation
@@ -107,11 +111,12 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "Asia/Kolkata"  # ✅ Correct (for UTC+5:30)
+
+USE_TZ = True
 
 USE_I18N = True
 
-USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
@@ -125,3 +130,26 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'tracker.CustomUser'
+
+import os
+from celery import Celery
+
+# Celery settings
+CELERY_BROKER_URL = "redis://localhost:6379/0"  # Ensure Redis is running
+CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+
+# Email settings (Ensure you have correct credentials)
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"  # Use your email provider
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'www.albinmania@gmail.com'
+EMAIL_HOST_PASSWORD = 'yzmi xota olph zcpn'
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER  
+
+
+# Base URL for generating full links
+SITE_URL = "http://127.0.0.1:8000"  # Change to "https://yourwebsite.com" in production
+

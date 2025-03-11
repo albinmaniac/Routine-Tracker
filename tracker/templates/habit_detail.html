@@ -6,6 +6,12 @@
     <title>{{ habit.name }} - Habit Details</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
+<style>
+    body{
+        background: rgb(238,174,202);
+        background: radial-gradient(circle, rgba(238,174,202,1) 0%, rgba(148,187,233,1) 100%);
+    }
+</style>
 <body class="bg-gray-100 p-6 flex justify-center items-center min-h-screen">
 
     <div class="bg-white shadow-md rounded-lg p-6 max-w-lg w-full">
@@ -54,20 +60,22 @@
 
         <!-- Mark Habit as Completed -->
         <h3 class="text-lg font-semibold mt-4">Mark Habit as Completed</h3>
-        <form method="post" class="mt-2">
-            {% csrf_token %}
-            <input type="hidden" name="habit_id" value="{{ habit.id }}">
-            
-            <!-- Hidden field to ensure a value is always sent -->
-            <input type="hidden" name="completed" value="false">
-            
-            <label class="flex items-center space-x-2">
-                <input type="checkbox" name="completed" value="true"
-                    {% if habit.trackers.last.completed %}checked{% endif %}
-                    onchange="this.form.submit();">
-                <span class="text-gray-700">Completed today</span>
-            </label>
-        </form>
+
+        {% if not habit.trackers.last.completed %} 
+            <form method="post" class="mt-2">
+                {% csrf_token %}
+                <input type="hidden" name="habit_id" value="{{ habit.id }}">
+                <input type="hidden" name="completed" value="false">
+                
+                <label class="flex items-center space-x-2">
+                    <input type="checkbox" name="completed" value="true"
+                        onchange="this.form.submit();">
+                    <span class="text-gray-700">Completed today</span>
+                </label>
+            </form>
+        {% else %}
+            <p class="text-green-600 font-semibold">✅ Completed for today!</p>
+        {% endif %}
 
         <!-- Buttons -->
         <div class="flex justify-between mt-6">

@@ -6,6 +6,12 @@
     <title>Habit List</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
+<style>
+    body{
+        background: rgb(238,174,202);
+        background: radial-gradient(circle, rgba(238,174,202,1) 0%, rgba(148,187,233,1) 100%);
+    }
+</style>
 <body class="bg-gray-100 p-6">
 
     <div class="container flex justify-between items-center px-5">
@@ -41,21 +47,22 @@
                     </a>
 
                     <!-- Progress Circle -->
-                    <div class="progress-container relative w-20 h-20">
-                        <svg class="progress-ring absolute inset-0 w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                    <div class="progress-container relative w-20 h-20 flex items-center justify-center">
+                        <svg class="progress-ring w-full h-full" viewBox="0 0 100 100">
                             <!-- Background Circle -->
                             <circle cx="50" cy="50" r="40" stroke-width="8" fill="none" stroke="#e0e0e0"></circle>
-                            
+
                             <!-- Progress Circle -->
-                            <circle cx="50" cy="50" r="40" stroke-width="8" fill="none" 
-                                stroke="blue" stroke-dasharray="251.2" 
+                            <circle cx="50" cy="50" r="40" stroke-width="8" fill="none"
+                                stroke="blue" stroke-dasharray="251.2"
                                 stroke-dashoffset="{{ habit.stroke_dashoffset }}"
-                                stroke-linecap="round">
-                            </circle>
+                                stroke-linecap="round"
+                                transform="rotate(-90 50 50)"></circle> 
+                                <!-- FIXED: Using 'rotate' inside transform -->
                         </svg>
 
                         <!-- Completion Percentage in Center -->
-                        <div class="absolute inset-0 flex justify-center items-center text-black font-bold">
+                        <div class="absolute text-black font-bold text-lg">
                             {{ habit.progress_percentage }}%
                         </div>
                     </div>
@@ -70,3 +77,4 @@
 
 </body>
 </html>
+

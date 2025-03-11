@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/4558b22531.js" crossorigin="anonymous"></script>
     <title>Routine Tracker</title>
     <style>
 
@@ -11,7 +12,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: white;
+            background: rgb(160, 89, 174);
             padding: 20px;
             border-radius: 10px;
             box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
@@ -26,7 +27,7 @@
         }
         .habit-info p {
             margin: 5px 0;
-            color: #555;
+            color: #000000;
         }
         .completed-badge {
             display: inline-block;
@@ -54,7 +55,9 @@
         }
 
         body {
-            background-color: #ffffff;
+            /* background: rgb(238,174,202);
+            background: radial-gradient(circle, rgba(238,174,202,1) 0%, rgba(148,187,233,1) 100%); */
+            background-image: url('https://images.unsplash.com/photo-1588345921489-f61ad896c562?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
             padding: 20px;
             max-width: 1000px;
             margin: 0 auto;
@@ -77,7 +80,7 @@
         }
 
         .nav-container {
-            background-color: #f2f3f5;
+            background-color: #bdd0f8;
             border-radius: 10px;
             padding: 15px;
             display: flex;
@@ -148,7 +151,7 @@
         }
 
         .stat-card {
-            background-color: #9c9696;
+            background-color: #e2b282;
             border-radius: 10px;
             padding: 25px;
         }
@@ -173,7 +176,7 @@
         .calendar-description {
             text-align: center;
             font-size: 18px;
-            color: #c9d6f1;
+            color: #000000;
             margin-bottom: 30px;
             max-width: 800px;
             margin-left: auto;
@@ -181,7 +184,8 @@
         }
 
         .calendar-container {
-            background-color: #c9d6f1;
+            background: rgb(112, 187, 150);
+            background: radial-gradient(circle, rgb(213, 179, 194) 0%, rgb(159, 179, 203) 100%);
             border-radius: 10px;
             overflow: hidden;
             margin-bottom: 30px;
@@ -347,7 +351,19 @@
         <p>Build better habits, one day at a time</p>
 
         <h1 style="color: #e74c3c; font-size: large; font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;"> Welcome  : {{ user.get_full_name }} 🔥</h1>
+        <div class="relative">
+            <button id="notification-bell" class="relative" >
+                <i class="fa-solid fa-bell" >
+                <span id="notification-count" class="absolute top-0 right-0 bg-red-500 text-white rounded-full px-1 text-xs"></span></i>
+            </button>
+            <div id="notification-dropdown" class="hidden absolute right-0 mt-2 w-64 bg-white shadow-md rounded-lg">
+                <div id="notification-container" class="p-2 text-sm"></div>
+                <button id="mark-all-read" class="w-full text-center bg-gray-100 p-2 text-xs">Mark All as Read</button>
+            </div>
+        </div>
     </div>
+
+    
 
     <div class="nav-container">
         <button class="nav-button" id="routines-btn">
@@ -357,6 +373,7 @@
 
             Routines
         </button>
+        
         <button class="nav-button" id="stats-btn">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
@@ -378,6 +395,7 @@
             </svg>
             Settings
         </button>
+
     </div>
 
     <button class="add-routine-button">
@@ -496,7 +514,7 @@
 
                     <div class="calendar-container">
                         <div class="calendar-header">
-                            🗓️{{ today|date:"F Y" }}
+                            <i class="fa-regular fa-calendar-check">  {{ today|date:"F Y" }}</i>
                         </div>
 
                         <!-- Calendar Grid -->
@@ -572,9 +590,7 @@
                     <a href="{%url 'signout'%}">
                     <div class="settings-item-label danger-text">Log Out</div></a>
                 </div>
-                <div class="settings-item">
-                    <div class="settings-item-label danger-text">Delete Account</div>
-                </div>
+                
             </div>
         </div>
     </div>
@@ -637,6 +653,63 @@
                 }
             });
         });
+
+        document.addEventListener("DOMContentLoaded", async function() {
+            let csrfToken = await getCSRFToken();  // Fetch CSRF token once and store it
+
+            function fetchNotifications() {
+                fetch("/notifications/")
+                    .then(response => response.json())
+                    .then(data => {
+                        let count = data.notifications.length;
+                        document.getElementById("notification-count").innerText = count > 0 ? count : "";
+
+                        let list = document.getElementById("notification-list");  // Fixed ID reference
+                        list.innerHTML = "";
+
+                        data.notifications.forEach(notification => {
+                            let li = document.createElement("li");
+                            li.innerText = `${notification.message} (${notification.timestamp})`;
+                            li.setAttribute("data-id", notification.id);
+                            li.style.cursor = "pointer";
+                            
+                            // Mark as read when clicked
+                            li.addEventListener("click", function() {
+                                markAsRead(notification.id, li);  // Pass the element for immediate UI update
+                            });
+
+                            list.appendChild(li);
+                        });
+
+                        document.getElementById("notification-dropdown").style.display = count > 0 ? "block" : "none";
+                    });
+            }
+
+            async function getCSRFToken() {
+                let response = await fetch("/notifications/csrf-token/");
+                let data = await response.json();
+                return data.csrfToken;
+            }
+
+            function markAsRead(notificationId, element) {
+                fetch(`/notifications/read/${notificationId}/`, {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": csrfToken,  // Use stored token
+                        "Content-Type": "application/json"
+                    }
+                }).then(response => {
+                    if (response.ok) {
+                        element.remove();  // Remove the clicked notification immediately
+                        let count = document.getElementById("notification-count").innerText;
+                        document.getElementById("notification-count").innerText = Math.max(0, count - 1) || "";  
+                    }
+                });
+            }
+
+            fetchNotifications();  // Load notifications on page load
+        });
+          
     </script>
 </body>
 

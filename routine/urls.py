@@ -45,12 +45,9 @@ urlpatterns = [
     
     path("habit/<int:habit_id>/stats/",views.HabitStatsView.as_view(), name="habit-stats"),
 
-    path("badges/", views.BadgeView.as_view(), name="badge-list"),
-
     path("calendar/", views.CalendarView.as_view(), name="calendar"),
-
 
     path("calendar/<int:year>/<int:month>/", views.CalendarView.as_view(), name="calendar_with_date"),
 
-
+    path('notifications/',views.get_notifications, name='notifications-api'),
 ]

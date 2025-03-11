@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Habit Reminder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            text-align: center;
+            padding: 30px;
+        }
+        .email-container {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 500px;
+            margin: auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .habit-name {
+            font-size: 22px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .cta-button {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-top: 15px;
+            font-size: 16px;
+        }
+        .cta-button:hover {
+            background: #2980b9;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <h2>🔔 It's Time for Your Habit!</h2>
+        <p class="habit-name">{{ habit_name }}</p>
+        <p>Stay consistent and achieve your goals! You've got this. 💪</p>
+        <a href="{{ habit_url }}" class="cta-button">Mark as Completed ✅</a>
+        <p class="footer">Powered by Routine Tracker 🚀</p>
+    </div>
+</body>
+</html>

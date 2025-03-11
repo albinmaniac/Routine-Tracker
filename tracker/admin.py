@@ -1,9 +1,9 @@
 from django.contrib import admin
-from .models import CustomUser, Habit, HabitTracker, HabitStats, Badge
+from .models import CustomUser, Habit, HabitTracker, HabitStats
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import UserChangeForm, UserCreationForm
-from .models import CustomUser, Habit, HabitTracker, HabitStats,Badge
+from .models import CustomUser, Habit, HabitTracker, HabitStats
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -65,7 +65,7 @@ class HabitStatsAdmin(admin.ModelAdmin):
 
 
 
-@admin.register(Badge)
-class BadgeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'level')
-    list_filter = ('level',)
+
+
+
+

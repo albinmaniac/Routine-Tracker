@@ -18,6 +18,7 @@
     
     body {
       background: #f0f2f5;
+      background-image: url('https://images.unsplash.com/photo-1581004979934-57f028c5332f?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
       font-family: 'Poppins', sans-serif;
       color: #444;
     }
@@ -266,6 +267,7 @@
         </div>
         
         <!-- Timing Section -->
+        <!-- Timing Section -->
         <div class="form-section timing-section">
           <div class="section-title">
             <div class="section-icon timing-icon">T</div>
@@ -287,7 +289,14 @@
               </div>
             </div>
           </div>
-          
+
+          <!-- ✅ Add Reminder Time Field Here -->
+          <div class="form-group">
+            <label for="{{ form.reminder_time.id_for_label }}" class="form-label">Reminder Time</label>
+            {{ form.reminder_time }}
+            <div class="form-helper-text">Set a time to receive habit reminders</div>
+          </div>
+
           <div class="form-group">
             <label for="{{ form.status.id_for_label }}" class="form-label">Status</label>
             {{ form.status }}
