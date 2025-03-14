@@ -16,13 +16,32 @@ app.autodiscover_tasks()
 def debug_task(self):
     print(f"Request: {self.request!r}")
 
-# ✅ Add periodic task directly (Runs every 15 minutes)
+# ✅ Add periodic tasks (Scheduled Execution)
 @app.on_after_finalize.connect
 def setup_periodic_tasks(sender, **kwargs):
-    from tracker.tasks import send_habit_reminder
+    from tracker.tasks import (
+        send_habit_reminders,
+        send_pending_habit_alerts,
+        reset_habit_reminders
+    )
 
+    # ✅ Send habit reminders every day at 8 AM
     sender.add_periodic_task(
-        crontab(minute="*/15"),  # Runs every 15 minutes
-        send_habit_reminder.s(),
-        name="Send Habit Reminders every 15 minutes"
+        crontab(hour=8, minute=0),
+        send_habit_reminders.s(),
+        name="Send Habit Reminders at 8 AM"
+    )
+
+    # ✅ Send pending habit alerts every day at 8 PM
+    sender.add_periodic_task(
+        crontab(hour=20, minute=0),
+        send_pending_habit_alerts.s(),
+        name="Send Pending Habit Emails at 8 PM"
+    )
+
+    # ✅ Reset reminders every day at midnight
+    sender.add_periodic_task(
+        crontab(hour=0, minute=0),
+        reset_habit_reminders.s(),
+        name="Reset Habit Reminders at Midnight"
     )

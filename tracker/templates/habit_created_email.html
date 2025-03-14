@@ -14,15 +14,36 @@
         </tr>
         <tr>
             <td style="padding: 20px; text-align: center;">
-                <p style="font-size: 18px; color: #333;">Hello {{ user.first_name }},</p>
+                <p style="font-size: 18px; color: #333;">Hello {{ user_name }},</p>
                 <p style="font-size: 16px; color: #555;">You've successfully created a new habit:</p>
-                <h2 style="color: #007bff;">{{ habit.name }}</h2>
-                <p style="font-size: 16px; color: #555;">Goal: <strong>{{ habit.goal }}</strong></p>
-                <p style="font-size: 16px; color: #555;">Frequency: <strong>{{ habit.frequency|title }}</strong></p>
-                <p style="font-size: 16px; color: #555;">Reminder Time: <strong>{{ habit.reminder_time }}</strong></p>
+                
+                <h2 style="color: #007bff; margin-bottom: 10px;">{{ habit_name }}</h2>
+        
+                {% if habit_goal %}
+                <p style="font-size: 16px; color: #555;">Goal: <strong>{{ habit_goal }}</strong></p>
+                {% else %}
+                <p style="font-size: 16px; color: #555;">Goal: <strong>Not specified</strong></p>
+                {% endif %}
+        
+                {% if habit_frequency %}
+                <p style="font-size: 16px; color: #555;">Frequency: <strong>{{ habit_frequency|title }}</strong></p>
+                {% else %}
+                <p style="font-size: 16px; color: #555;">Frequency: <strong>Not set</strong></p>
+                {% endif %}
+        
+                {% if habit_reminder_time %}
+                <p style="font-size: 16px; color: #555;">Reminder Time: <strong>{{ habit_reminder_time }}</strong></p>
+                {% else %}
+                <p style="font-size: 16px; color: #555;">Reminder Time: <strong>None</strong></p>
+                {% endif %}
+        
                 <hr style="border: 1px solid #ddd; margin: 20px 0;">
+        
                 <p style="font-size: 14px; color: #666;">Stay consistent and track your progress in the Routine Tracker app!</p>
-                <a href="{{ site_url }}" style="background: #007bff; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; font-size: 16px;">View Habit</a>
+                
+                <a href="{{ site_url }}" style="background: #007bff; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; font-size: 16px;">
+                    View Habit
+                </a>
             </td>
         </tr>
         <tr>

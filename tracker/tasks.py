@@ -1,5 +1,5 @@
 from celery import shared_task
-from django.utils.timezone import now
+from django.utils.timezone import now, localdate
 
 @shared_task
 def send_habit_reminders(habit_id=None):
@@ -7,12 +7,17 @@ def send_habit_reminders(habit_id=None):
     print("🔔 Running send_habit_reminders task...")  
 
     from tracker.utils import send_habit_email
-    from tracker.models import Habit, Notification  # ✅ Import Notification model
+    from tracker.models import Habit, Notification  
+
+    today = localdate()  # ✅ Get today's date
 
     if habit_id:
         habits = Habit.objects.filter(id=habit_id)
     else:
-        habits = Habit.objects.filter(reminder_time__lte=now(), reminder_sent=False)
+        habits = Habit.objects.filter(
+            reminder_time__lte=now(),
+            reminder_sent=False
+        ).exclude(last_completed_date=today)  # ✅ Skip habits already completed today
 
     if not habits.exists():
         print("⚠️ No habits found for reminders.")
@@ -39,14 +44,16 @@ def send_habit_reminders(habit_id=None):
 @shared_task
 def send_pending_habit_alerts():
     """✅ Sends emails for habits that are overdue (not completed on time)."""
-    print("⚠️ Running send_pending_habit_alerts task...")  # Debugging
+    print("⚠️ Running send_pending_habit_alerts task...")  
 
     from tracker.models import Habit
     from tracker.utils import send_habit_email
+    today = localdate()
+
     pending_habits = Habit.objects.filter(
-        status__in=["active", "paused"],  # ✅ Habit is still pending
-        reminder_time__lt=now()  # ✅ The habit is overdue
-    )
+        status__in=["active", "paused"],  
+        reminder_time__lt=now()  
+    ).exclude(last_completed_date=today)  # ✅ Exclude habits completed today
 
     if not pending_habits.exists():
         print("⚠️ No pending habits found.")
@@ -58,3 +65,15 @@ def send_pending_habit_alerts():
 
     print("✅ Pending habit emails sent successfully.")
     return f"{pending_habits.count()} pending habit emails sent."
+
+
+@shared_task
+def reset_habit_reminders():
+    """✅ Resets reminder_sent to False every day at midnight."""
+    print("🔄 Resetting habit reminders...")  
+
+    from tracker.models import Habit
+    Habit.objects.all().update(reminder_sent=False)  # ✅ Reset for all habits
+
+    print("✅ Habit reminders reset.")
+    return "Habit reminders reset."

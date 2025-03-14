@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect,get_object_or_404
 from django.views.generic import View
 from django.contrib.auth import authenticate, login, logout
 from tracker.forms import RegistrationForm, LoginForm,HabitForm,HabitTrackerForm
-from tracker.models import CustomUser  
+from tracker.models import CustomUser,Notification
 from tracker.models import Habit, HabitTracker, HabitStats
 from django.contrib import messages 
 import calendar
@@ -12,6 +12,10 @@ from django.utils.timezone import now
 from django.views.generic import TemplateView
 from datetime import timedelta,datetime
 from django.db.models import Count,Q
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from django.middleware.csrf import get_token
 
 
 # User Registration View
@@ -172,7 +176,6 @@ class CreateHabitView(View):
     
 
 
-
 class HabitListView(View):
     template_name = "habits.html"
 
@@ -220,33 +223,6 @@ class HabitDetailView(View):
             "habit_stats": habit_stats
         })
     
-    # def post(self, request, pk, *args, **kwargs):
-    #     habit = get_object_or_404(Habit, pk=pk, user=request.user)
-    #     completed = request.POST.get("completed") == "true"  # Convert to boolean
-
-    #     # ✅ Get today's tracker or create a new one
-    #     tracker, created = HabitTracker.objects.get_or_create(habit=habit, date=timezone.now().date())
-
-    #     # ✅ Update completion status & progress
-    #     tracker.completed = completed
-    #     tracker.value_done = habit.target_value if completed else 0.0  # 100% if checked, 0% if unchecked
-    #     tracker.save()  # ✅ Auto-calls `save()` with progress update
-
-    #     # ✅ Update habit progress
-    #     habit.completed_value = habit.target_value if completed else 0.0  # 100% or reset to 0
-
-    #     # ✅ Update `end_date` only if completed
-    #     if completed:
-    #         habit.end_date = timezone.now().date()  # Set today's date
-    #     elif habit.trackers.filter(completed=True).exists():
-    #         # If there are previous completions, keep the last completed date
-    #         habit.end_date = habit.trackers.filter(completed=True).latest('date').date
-    #     else:
-    #         habit.end_date = None  # Reset if no completion history
-
-    #     habit.save()
-
-    #     return redirect("habit-detail", pk=habit.pk)
     def post(self, request, pk, *args, **kwargs):
         habit = get_object_or_404(Habit, pk=pk, user=request.user)
 
@@ -404,16 +380,7 @@ class HabitStatsView(View):
         })
     
 
-
-
-    
-
-
-import calendar
-from datetime import datetime
-from django.utils.timezone import now
-from django.views.generic import TemplateView
-from .models import Habit
+#======= CALENDAR SECTION=======
 
 class CalendarView(TemplateView):
     template_name = "calendar.html"
@@ -458,11 +425,6 @@ class CalendarView(TemplateView):
         return context
     
 
-from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_POST
-from tracker.models import Notification
-from django.middleware.csrf import get_token
 
 @login_required
 def get_notifications(request):
@@ -495,4 +457,3 @@ def mark_notification_as_read(request, notification_id):
 def get_csrf_token(request):
     """✅ Returns a CSRF token for AJAX requests"""
     return JsonResponse({"csrfToken": get_token(request)})
-
